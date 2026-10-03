@@ -1,0 +1,13 @@
+/.venv
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.hypothesis/
+sim_build/
+results*.xml
+pytest-*.xml
+coverage.xml
+.coverage
+perf_report.md
+sweep.csv
+*.vcd

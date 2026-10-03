@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  model:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[test]"
+      - name: Model tests (Barrett, butterfly, fast NTT against the golden NTT)
+        run: pytest -m "not rtl"
+
+  rtl:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        sim: [verilator, icarus]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install simulators
+        run: sudo apt-get update && sudo apt-get install -y verilator iverilog
+      - name: Install
+        run: pip install -e ".[rtl,test]"
+      - name: Lint
+        if: matrix.sim == 'verilator'
+        run: verilator --lint-only -Wall rtl/*.sv --top-module ntt_core
+      - name: RTL tests (cocotb)
+        run: SIM=${{ matrix.sim }} MAKEFLAGS=-j2 pytest -m rtl
