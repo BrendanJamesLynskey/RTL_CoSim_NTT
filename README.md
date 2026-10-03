@@ -137,7 +137,7 @@ weights each net by its capacitance.
   golden NTT and the simulator calibrated here.
 * [Interview_SystemVerilog](https://github.com/BrendanJamesLynskey/Interview_SystemVerilog):
   interview questions on SystemVerilog, UVM and coverage.
-* [Interview_DSP challenge 06](https://github.com/BrendanJamesLynskey/Interview_DSP/blob/main/06_implementation/coding_challenges/challenge_06_fft_butterfly_rtl.sv):
+* [Interview_DSP challenge 06](https://github.com/BrendanJamesLynskey/Interview_DSP/blob/master/06_implementation/coding_challenges/challenge_06_fft_butterfly_rtl.sv):
   the fixed-point FFT butterfly this design's structure follows.
 
 ## Licence
