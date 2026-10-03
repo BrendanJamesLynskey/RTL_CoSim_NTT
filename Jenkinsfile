@@ -48,6 +48,9 @@ pipeline {
                 sh '''
                     python3 -m venv .venv
                     .venv/bin/pip install -q -e ".[rtl,test]"
+                    # pip keeps an installed git dependency whose version number has not changed, so
+                    # fetch FHE_Accelerator_Sim's current commit every time.
+                    .venv/bin/pip install -q --force-reinstall --no-deps "fhe-sim @ git+https://github.com/BrendanJamesLynskey/FHE_Accelerator_Sim"
                 '''
             }
         }
