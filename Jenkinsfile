@@ -1,6 +1,6 @@
 // Jenkins pipeline for RTL_CoSim_NTT.
 //
-// Stages: lint (Verilator -Wall, Icarus parse) -> model tests (pytest, JUnit, coverage)
+// Stages: clean old reports -> lint (Verilator -Wall, Icarus parse) -> model tests (pytest, JUnit, coverage)
 // -> RTL tests on Verilator (cocotb, JUnit) -> RTL tests on Icarus -> cycle-count
 // performance gate against ci/cycle_baseline.json -> results.md -> an optional nightly
 // seed sweep with longer campaigns.
@@ -34,6 +34,15 @@ pipeline {
     }
 
     stages {
+        // The workspace is reused between builds (it keeps the virtualenv and build caches), so
+        // delete the previous build's reports first. Without this a build that fails before its
+        // tests run publishes the last build's JUnit results as its own (Rust_DES_Kernel #4 did).
+        stage('Clean reports') {
+            steps {
+                sh 'rm -f pytest-*.xml coverage.xml perf_report.md sweep.csv'
+            }
+        }
+
         stage('Setup') {
             steps {
                 sh '''
