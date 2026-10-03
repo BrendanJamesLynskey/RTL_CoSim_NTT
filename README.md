@@ -131,6 +131,14 @@ weights each net by its capacitance.
   [`ci/cycle_baseline.json`](ci/cycle_baseline.json), `results.md` as an artifact, and a
   nightly seed sweep ([`ci/seed_sweep.py`](ci/seed_sweep.py)).
 
+## How the measurements are made
+
+The tools and methods this repository measures with are explained, with their overheads, accuracy and pitfalls, in [SimEng 12: Measurement Tools and Methods](https://brendanjameslynskey.github.io/SimEng_12_Measurement_Tools_and_Methods/) and the series glossaries:
+
+* [functional coverage, and Verilator's line and toggle coverage](https://brendanjameslynskey.github.io/SimEng_12_Measurement_Tools_and_Methods/#card-rtlcov)
+* [toggle counts as a power proxy](https://brendanjameslynskey.github.io/SimEng_12_Measurement_Tools_and_Methods/#card-toggles)
+* [RTL power flows (SAIF/VCD)](https://brendanjameslynskey.github.io/SimEng_12_Measurement_Tools_and_Methods/#card-rtlpower)
+
 ## Related
 
 * [FHE_Accelerator_Sim](https://github.com/BrendanJamesLynskey/FHE_Accelerator_Sim): the
