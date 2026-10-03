@@ -25,8 +25,9 @@ pipeline {
     }
 
     environment {
-        PATH = "${params.VERILATOR_ROOT}/bin:${env.PATH}"
-        VERILATOR_ROOT = "${params.VERILATOR_ROOT}"
+        // params are null on a job's very first build, before Jenkins has read the parameters block
+        VERILATOR_ROOT = "${params.VERILATOR_ROOT ?: env.HOME + '/.local/opt/verilator-deb/root/usr/share/verilator'}"
+        PATH = "${params.VERILATOR_ROOT ?: env.HOME + '/.local/opt/verilator-deb/root/usr/share/verilator'}/bin:${env.PATH}"
         MAKEFLAGS = '-j2'
     }
 
