@@ -25,11 +25,11 @@ pipeline {
     }
 
     environment {
-        // params are null on a job's very first build, before Jenkins has read the parameters block
+        // Empty unless the VERILATOR_ROOT parameter is set. Never default a parameter to "${env.HOME}/...":
+        // parameters {} is evaluated before the agent exists, so it becomes "null/..." (builds #1-#3 failed so).
         VR = "${params.VERILATOR_ROOT ?: ''}"
         MAKEFLAGS = '-j2'
-        // Jenkins does not pass a PATH set here to sh steps, and HOME is only known to the shell,
-        // so each step that needs Verilator sets it up itself
+        // HOME is resolved by each step's shell, so each step that needs Verilator sets it up itself
         VPATH = 'export VERILATOR_ROOT="${VR:-$HOME/.local/opt/verilator-deb/root/usr/share/verilator}"; [ -d "$VERILATOR_ROOT" ] && export PATH="$VERILATOR_ROOT/bin:$PATH" || unset VERILATOR_ROOT; '
     }
 
