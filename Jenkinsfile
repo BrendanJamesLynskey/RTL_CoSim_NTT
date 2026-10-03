@@ -15,8 +15,8 @@ pipeline {
         booleanParam(name: 'NIGHTLY', defaultValue: false,
                      description: 'Longer campaigns, more core builds and the seed sweep (the nightly job sets this)')
         string(name: 'SWEEP_SEEDS', defaultValue: '8', description: 'Seeds per stimulus kind in the sweep')
-        string(name: 'VERILATOR_ROOT', defaultValue: "${env.HOME}/.local/opt/verilator-deb/root/usr/share/verilator",
-               description: 'Verilator install (empty: use the one on PATH)')
+        string(name: 'VERILATOR_ROOT', defaultValue: '',
+               description: 'Verilator install (empty: ~/.local/opt/verilator-deb/..., else the one on PATH)')
     }
 
     options {
@@ -26,10 +26,11 @@ pipeline {
 
     environment {
         // params are null on a job's very first build, before Jenkins has read the parameters block
-        VERILATOR_ROOT = "${params.VERILATOR_ROOT ?: env.HOME + '/.local/opt/verilator-deb/root/usr/share/verilator'}"
+        VR = "${params.VERILATOR_ROOT ?: ''}"
         MAKEFLAGS = '-j2'
-        // Jenkins does not pass a PATH set here to sh steps, so each step that needs Verilator prepends it
-        VPATH = 'export PATH="$VERILATOR_ROOT/bin:$PATH"; '
+        // Jenkins does not pass a PATH set here to sh steps, and HOME is only known to the shell,
+        // so each step that needs Verilator sets it up itself
+        VPATH = 'export VERILATOR_ROOT="${VR:-$HOME/.local/opt/verilator-deb/root/usr/share/verilator}"; [ -d "$VERILATOR_ROOT" ] && export PATH="$VERILATOR_ROOT/bin:$PATH" || unset VERILATOR_ROOT; '
     }
 
     stages {
