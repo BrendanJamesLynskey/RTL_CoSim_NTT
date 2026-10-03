@@ -27,8 +27,9 @@ pipeline {
     environment {
         // params are null on a job's very first build, before Jenkins has read the parameters block
         VERILATOR_ROOT = "${params.VERILATOR_ROOT ?: env.HOME + '/.local/opt/verilator-deb/root/usr/share/verilator'}"
-        PATH = "${params.VERILATOR_ROOT ?: env.HOME + '/.local/opt/verilator-deb/root/usr/share/verilator'}/bin:${env.PATH}"
         MAKEFLAGS = '-j2'
+        // Jenkins does not pass a PATH set here to sh steps, so each step that needs Verilator prepends it
+        VPATH = 'export PATH="$VERILATOR_ROOT/bin:$PATH"; '
     }
 
     stages {
@@ -43,8 +44,8 @@ pipeline {
 
         stage('Lint') {
             steps {
-                sh 'verilator --lint-only -Wall rtl/*.sv --top-module ntt_core'
-                sh 'verilator --lint-only -Wall -GP=4 rtl/*.sv --top-module ntt_core'
+                sh(env.VPATH + 'verilator --lint-only -Wall rtl/*.sv --top-module ntt_core')
+                sh(env.VPATH + 'verilator --lint-only -Wall -GP=4 rtl/*.sv --top-module ntt_core')
                 sh 'iverilog -g2012 -o /dev/null rtl/*.sv'
             }
         }
@@ -58,19 +59,19 @@ pipeline {
 
         stage('RTL tests (Verilator)') {
             steps {
-                sh "SIM=verilator NIGHTLY=${params.NIGHTLY ? 1 : 0} .venv/bin/pytest -m rtl --junitxml=pytest-verilator.xml"
+                sh(env.VPATH + "SIM=verilator NIGHTLY=${params.NIGHTLY ? 1 : 0} .venv/bin/pytest -m rtl --junitxml=pytest-verilator.xml")
             }
         }
 
         stage('RTL tests (Icarus)') {
             steps {
-                sh 'SIM=icarus .venv/bin/pytest -m rtl --junitxml=pytest-icarus.xml'
+                sh(env.VPATH + 'SIM=icarus .venv/bin/pytest -m rtl --junitxml=pytest-icarus.xml')
             }
         }
 
         stage('Cycle-count gate') {
             steps {
-                sh '.venv/bin/python ci/cycle_gate.py'
+                sh(env.VPATH + '.venv/bin/python ci/cycle_gate.py')
             }
             post {
                 always { archiveArtifacts artifacts: 'perf_report.md', allowEmptyArchive: true }
@@ -79,7 +80,7 @@ pipeline {
 
         stage('Results') {
             steps {
-                sh '.venv/bin/python examples/results.py > /dev/null'
+                sh(env.VPATH + '.venv/bin/python examples/results.py > /dev/null')
                 archiveArtifacts artifacts: 'examples/results.md'
             }
         }
@@ -87,7 +88,7 @@ pipeline {
         stage('Nightly seed sweep') {
             when { expression { params.NIGHTLY } }
             steps {
-                sh ".venv/bin/python ci/seed_sweep.py ${params.SWEEP_SEEDS} 4000"
+                sh(env.VPATH + ".venv/bin/python ci/seed_sweep.py ${params.SWEEP_SEEDS} 4000")
                 archiveArtifacts artifacts: 'sweep.csv'
             }
         }
